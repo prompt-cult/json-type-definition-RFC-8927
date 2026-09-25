@@ -20,8 +20,8 @@ def main() -> None:
 
     barrel_lines: list[str] = []
 
-    for schema_path in sorted(SCHEMA_DIR.glob("*.jdt.json")):
-        stem = schema_path.name.removesuffix(".jdt.json")
+    for schema_path in sorted(SCHEMA_DIR.glob("*.jtd.json")):
+        stem = schema_path.name.removesuffix(".jtd.json")
         snake = stem.replace("-", "_")
         out_path = OUT_DIR / f"{snake}.py"
         code = subprocess.check_output(

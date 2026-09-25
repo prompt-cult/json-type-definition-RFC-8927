@@ -11,12 +11,12 @@ function exportName(stem) {
   return "validate" + stem.replace(/(^|-)([a-z])/g, (_, __, c) => c.toUpperCase());
 }
 
-const schemas = (await readdir(SCHEMA_DIR)).filter((f) => f.endsWith(".jdt.json"));
+const schemas = (await readdir(SCHEMA_DIR)).filter((f) => f.endsWith(".jtd.json"));
 await mkdir(OUT_DIR, { recursive: true });
 
 const barrelLines = [];
 for (const file of schemas.sort()) {
-  const stem = file.replace(/\.jdt\.json$/, "");
+  const stem = file.replace(/\.jtd\.json$/, "");
   const schemaPath = path.join(SCHEMA_DIR, file);
   const outPath = path.join(OUT_DIR, `${stem}.mjs`);
   const code = execFileSync(JTD_CODEGEN, ["--target", "js", schemaPath], {

@@ -1,6 +1,6 @@
 ---
 name: jtd-py-validator
-description: Generate standalone Python 3.13+ JTD validators with jtd-codegen from *.jdt.json schemas. Use when adding JTD validation to Python projects, Makefile or pyproject.toml codegen workflows, or multiple schema files that need differentiated validate exports.
+description: Generate standalone Python 3.13+ JTD validators with jtd-codegen from *.jtd.json schemas. Use when adding JTD validation to Python projects, Makefile or pyproject.toml codegen workflows, or multiple schema files that need differentiated validate exports.
 ---
 
 # JTD → Python validator generation
@@ -28,14 +28,14 @@ Requires **Python 3.9+** to run generated `.py` validators. Generated code uses 
 
 | Input | Output | Export |
 |-------|--------|--------|
-| `schemas/user.jdt.json` | `generated/user.py` | `def validate(instance)` |
-| `schemas/event.jdt.json` | `generated/event.py` | `def validate(instance)` |
+| `schemas/user.jtd.json` | `generated/user.py` | `def validate(instance)` |
+| `schemas/event.jtd.json` | `generated/event.py` | `def validate(instance)` |
 
 Rules:
 
-1. Schema files use the suffix `.jdt.json` (JTD schema JSON).
+1. Schema files use the suffix `.jtd.json` (JTD schema JSON).
 2. Generated validators use `.py` and live in a `generated/` directory (or `validators/` — be consistent).
-3. Base name is the schema stem with lowercase: `User.jdt.json` → `user.py`.
+3. Base name is the schema stem with lowercase: `User.jtd.json` → `user.py`.
 4. Each generated module exports a single `validate(instance)` function.
 
 ### `validate` return value
@@ -63,7 +63,7 @@ Empty list means valid. Do **not** pass a JSON string — parse first with `json
 
 ## Single schema workflow
 
-### Example schema (`schemas/user.jdt.json`)
+### Example schema (`schemas/user.jtd.json`)
 
 Use the repo's simple user example:
 
@@ -83,7 +83,7 @@ Use the repo's simple user example:
 ### Generate one validator
 
 ```bash
-jtd-codegen --target python schemas/user.jdt.json > generated/user.py
+jtd-codegen --target python schemas/user.jtd.json > generated/user.py
 ```
 
 ### Use the validator
@@ -102,15 +102,15 @@ if errors:
 
 ## Multiple schemas: per-file validators + barrel re-exports
 
-When several `.jdt.json` files exist, generate **one `.py` per schema**. Each file defines `validate`, which would collide if imported together. Solve this with a package barrel (`__init__.py`) that re-exports each `validate` under a **differentiated name**.
+When several `.jtd.json` files exist, generate **one `.py` per schema**. Each file defines `validate`, which would collide if imported together. Solve this with a package barrel (`__init__.py`) that re-exports each `validate` under a **differentiated name**.
 
 Naming rule for re-exports: `validate_` + snake_case schema stem.
 
 | Schema | Generated module | Barrel export name |
 |--------|------------------|-------------------|
-| `user.jdt.json` | `user.py` | `validate_user` |
-| `event.jdt.json` | `event.py` | `validate_event` |
-| `order-item.jdt.json` | `order_item.py` | `validate_order_item` |
+| `user.jtd.json` | `user.py` | `validate_user` |
+| `event.jtd.json` | `event.py` | `validate_event` |
+| `order-item.jtd.json` | `order_item.py` | `validate_order_item` |
 
 ### Barrel file (`generated/__init__.py`)
 
@@ -140,7 +140,7 @@ Set `JTD_CODEGEN` to the binary path. Discover schemas and map to outputs (hyphe
 JTD_CODEGEN ?= jtd-codegen
 SCHEMA_DIR  := schemas
 OUT_DIR     := generated
-SCHEMAS     := $(wildcard $(SCHEMA_DIR)/*.jdt.json)
+SCHEMAS     := $(wildcard $(SCHEMA_DIR)/*.jtd.json)
 
 .PHONY: validators clean-validators test-validators FORCE
 
@@ -150,12 +150,12 @@ $(OUT_DIR)/__init__.py: FORCE
 	@mkdir -p $(OUT_DIR)
 	@rm -f $(OUT_DIR)/*.py $(OUT_DIR)/__init__.py
 	@for schema in $(SCHEMAS); do \
-	  stem=$$(basename "$$schema" .jdt.json); \
+	  stem=$$(basename "$$schema" .jtd.json); \
 	  snake=$$(echo "$$stem" | sed 's/-/_/g'); \
 	  $(JTD_CODEGEN) --target python "$$schema" > "$(OUT_DIR)/$$snake.py"; \
 	done
 	@for schema in $(SCHEMAS); do \
-	  stem=$$(basename "$$schema" .jdt.json); \
+	  stem=$$(basename "$$schema" .jtd.json); \
 	  snake=$$(echo "$$stem" | sed 's/-/_/g'); \
 	  echo "from .$$snake import validate as validate_$$snake" >> $@; \
 	done
@@ -219,8 +219,8 @@ def main() -> None:
 
     barrel_lines: list[str] = []
 
-    for schema_path in sorted(SCHEMA_DIR.glob("*.jdt.json")):
-        stem = schema_path.name.removesuffix(".jdt.json")
+    for schema_path in sorted(SCHEMA_DIR.glob("*.jtd.json")):
+        stem = schema_path.name.removesuffix(".jtd.json")
         snake = stem.replace("-", "_")
         out_path = OUT_DIR / f"{snake}.py"
         code = subprocess.check_output(
@@ -263,7 +263,7 @@ setup(cmdclass={"build_py": BuildPy})
 
 When adding JTD Python validators to a project:
 
-1. Place JTD schemas in `schemas/*.jdt.json`.
+1. Place JTD schemas in `schemas/*.jtd.json`.
 2. Add `generated/` to `.gitignore` if validators are build artifacts, or commit them if you want zero-codegen deploys.
 3. Wire codegen into `Makefile` (`validators` target) or `pyproject.toml` / `scripts/codegen-validators.py`.
 4. For multiple schemas, always generate `generated/__init__.py` with differentiated `validate_*` exports.
@@ -291,7 +291,7 @@ Both should print `Python validator fixture test PASSED`.
 
 ## Reference
 
-- CLI: `jtd-codegen --target python <schema.jdt.json>` writes a Python module to stdout.
+- CLI: `jtd-codegen --target python <schema.jtd.json>` writes a Python module to stdout.
 - Emitter source: `jtd-codegen/src/emit_py/`.
-- Repo examples: `examples/01_simple_user/schema.json`, `examples/02_complex_event/schema.json`.
+- Repo examples: `examples/01_simple_user/schema.jtd.json`, `examples/02_complex_event/schema.jtd.json`.
 - Full test suite: `xmake run test_all` (includes Python validation via subprocess).

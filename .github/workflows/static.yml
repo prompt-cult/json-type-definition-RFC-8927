@@ -47,10 +47,10 @@ jobs:
         run: |
           set -euo pipefail
           for example_dir in examples/*/; do
-            if [[ -f "${example_dir}schema.json" ]]; then
+            if [[ -f "${example_dir}schema.jtd.json" ]]; then
               example=$(basename "$example_dir")
               echo "Compiling JS validator for $example..."
-              ./target/release/jtd-codegen --target js "${example_dir}schema.json" > "${example_dir}validator.js"
+              ./target/release/jtd-codegen --target js "${example_dir}schema.jtd.json" > "${example_dir}validator.js"
             fi
           done
       
@@ -59,12 +59,12 @@ jobs:
           set -euo pipefail
           for example_dir in examples/*/; do
             wasm_dir="${example_dir}wasm"
-            if [[ -d "$wasm_dir" ]] && [[ -f "${example_dir}schema.json" ]]; then
+            if [[ -d "$wasm_dir" ]] && [[ -f "${example_dir}schema.jtd.json" ]]; then
               example=$(basename "$example_dir")
               echo "Compiling WASM validator for $example..."
               
               # Generate Rust validator
-              ./target/release/jtd-codegen --target rust "${example_dir}schema.json" > "${wasm_dir}/src/validator.rs"
+              ./target/release/jtd-codegen --target rust "${example_dir}schema.jtd.json" > "${wasm_dir}/src/validator.rs"
               
               # Build WASM
               wasm-pack build --target web --out-dir ../pkg "$wasm_dir"
