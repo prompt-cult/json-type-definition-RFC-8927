@@ -11,11 +11,11 @@ function exportName(stem) {
   return "validate" + stem.replace(/(^|-)([a-z])/g, (_, __, c) => c.toUpperCase());
 }
 
-const schemas = (await readdir(SCHEMA_DIR)).filter((f) => f.endsWith(".jdt.json"));
+const schemas = (await readdir(SCHEMA_DIR)).filter((f) => f.endsWith(".jtd.json"));
 await mkdir(OUT_DIR, { recursive: true });
 
 const expectedOutputs = new Set(
-  schemas.map((file) => `${file.replace(/\.jdt\.json$/, "")}.mjs`),
+  schemas.map((file) => `${file.replace(/\.jtd\.json$/, "")}.mjs`),
 );
 for (const file of await readdir(OUT_DIR)) {
   if (file.endsWith(".mjs") && !expectedOutputs.has(file) && file !== "validators.mjs") {
@@ -25,7 +25,7 @@ for (const file of await readdir(OUT_DIR)) {
 
 const barrelLines = [];
 for (const file of schemas.sort()) {
-  const stem = file.replace(/\.jdt\.json$/, "");
+  const stem = file.replace(/\.jtd\.json$/, "");
   const schemaPath = path.join(SCHEMA_DIR, file);
   const outPath = path.join(OUT_DIR, `${stem}.mjs`);
   const code = execFileSync(JTD_CODEGEN, ["--target", "js", schemaPath], {

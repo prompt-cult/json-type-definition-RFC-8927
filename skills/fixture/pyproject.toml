@@ -1,0 +1,8 @@
+[project]
+name = "jtd-py-fixture"
+version = "0.0.0"
+requires-python = ">=3.9"
+
+[tool.hatch.envs.default.scripts]
+codegen-validators = "python scripts/codegen-validators.py"
+test-validators = "python test_py.py"

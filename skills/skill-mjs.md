@@ -1,6 +1,6 @@
 ---
 name: jtd-mjs-validator
-description: Generate standalone ESM (.mjs) JTD validators with jtd-codegen from *.jdt.json schemas. Use when adding JTD validation to Node.js projects, Makefile or package.json codegen workflows, or multiple schema files that need differentiated validate exports.
+description: Generate standalone ESM (.mjs)  RFC 8927 JSON Type Definition "JTD" validators with jtd-codegen from *.jtd.json schemas. Use when adding RFC 8927 JSON Type Definition "JTD" validation to browser-side SPA logic or server-side Bunx/Deno/Node.js projects, Makefile or package.json codegen workflows, or multiple schema files that need differentiated validate exports.
 ---
 
 # JTD → MJS validator generation
@@ -28,14 +28,14 @@ Requires Node.js 18+ (or Bun) to run generated `.mjs` validators. Generated code
 
 | Input | Output | Export |
 |-------|--------|--------|
-| `schemas/user.jdt.json` | `generated/user.mjs` | `export function validate(instance)` |
-| `schemas/event.jdt.json` | `generated/event.mjs` | `export function validate(instance)` |
+| `schemas/user.jtd.json` | `generated/user.mjs` | `export function validate(instance)` |
+| `schemas/event.jtd.json` | `generated/event.mjs` | `export function validate(instance)` |
 
 Rules:
 
-1. Schema files use the suffix `.jdt.json` (JTD schema JSON).
+1. Schema files use the suffix `.jtd.json` (JTD schema JSON).
 2. Generated validators use `.mjs` and live in a `generated/` directory (or `validators/` — be consistent).
-3. Base name is the schema stem with lowercase: `User.jdt.json` → `user.mjs`.
+3. Base name is the schema stem with lowercase: `User.jtd.json` → `user.mjs`.
 4. Each generated module exports a single `validate(instance)` function.
 
 ### `validate` return value
@@ -92,7 +92,7 @@ Share schemas with `definitions` and reference them by name with `ref`:
 
 ## Single schema workflow
 
-### Example schema (`schemas/user.jdt.json`)
+### Example schema (`schemas/user.jtd.json`)
 
 Use the repo's simple user example:
 
@@ -112,7 +112,7 @@ Use the repo's simple user example:
 ### Generate one validator
 
 ```bash
-jtd-codegen --target js schemas/user.jdt.json > generated/user.mjs
+jtd-codegen --target js schemas/user.jtd.json > generated/user.mjs
 ```
 
 ### Use the validator
@@ -132,15 +132,15 @@ if (errors.length > 0) {
 
 ## Multiple schemas: per-file validators + barrel re-exports
 
-When several `.jdt.json` files exist, generate **one `.mjs` per schema**. Each file exports `validate`, which would collide if imported together. Solve this with a barrel module that re-exports each `validate` under a **differentiated name**.
+When several `.jtd.json` files exist, generate **one `.mjs` per schema**. Each file exports `validate`, which would collide if imported together. Solve this with a barrel module that re-exports each `validate` under a **differentiated name**.
 
 Naming rule for re-exports: `validate` + capitalized schema stem.
 
 | Schema | Generated module | Barrel export name |
 |--------|------------------|-------------------|
-| `user.jdt.json` | `user.mjs` | `validateUser` |
-| `event.jdt.json` | `event.mjs` | `validateEvent` |
-| `order-item.jdt.json` | `order-item.mjs` | `validateOrderItem` |
+| `user.jtd.json` | `user.mjs` | `validateUser` |
+| `event.jtd.json` | `event.mjs` | `validateEvent` |
+| `order-item.jtd.json` | `order-item.mjs` | `validateOrderItem` |
 
 ### Barrel file (`generated/validators.mjs`)
 
@@ -168,14 +168,14 @@ Set `JTD_CODEGEN` to the binary path. Discover schemas and map to outputs:
 JTD_CODEGEN ?= jtd-codegen
 SCHEMA_DIR  := schemas
 OUT_DIR     := generated
-SCHEMAS     := $(wildcard $(SCHEMA_DIR)/*.jdt.json)
-VALIDATORS  := $(patsubst $(SCHEMA_DIR)/%.jdt.json,$(OUT_DIR)/%.mjs,$(SCHEMAS))
+SCHEMAS     := $(wildcard $(SCHEMA_DIR)/*.jtd.json)
+VALIDATORS  := $(patsubst $(SCHEMA_DIR)/%.jtd.json,$(OUT_DIR)/%.mjs,$(SCHEMAS))
 
 .PHONY: validators clean-validators test-validators
 
 validators: $(VALIDATORS) $(OUT_DIR)/validators.mjs
 
-$(OUT_DIR)/%.mjs: $(SCHEMA_DIR)/%.jdt.json
+$(OUT_DIR)/%.mjs: $(SCHEMA_DIR)/%.jtd.json
 	@mkdir -p $(OUT_DIR)
 	$(JTD_CODEGEN) --target js $< > $@
 
@@ -227,11 +227,11 @@ function exportName(stem) {
   return "validate" + stem.replace(/(^|-)([a-z])/g, (_, __, c) => c.toUpperCase());
 }
 
-const schemas = (await readdir(SCHEMA_DIR)).filter((f) => f.endsWith(".jdt.json"));
+const schemas = (await readdir(SCHEMA_DIR)).filter((f) => f.endsWith(".jtd.json"));
 await mkdir(OUT_DIR, { recursive: true });
 
 const expectedOutputs = new Set(
-  schemas.map((file) => `${file.replace(/\.jdt\.json$/, "")}.mjs`),
+  schemas.map((file) => `${file.replace(/\.jtd\.json$/, "")}.mjs`),
 );
 for (const file of await readdir(OUT_DIR)) {
   if (file.endsWith(".mjs") && !expectedOutputs.has(file) && file !== "validators.mjs") {
@@ -241,7 +241,7 @@ for (const file of await readdir(OUT_DIR)) {
 
 const barrelLines = [];
 for (const file of schemas) {
-  const stem = file.replace(/\.jdt\.json$/, "");
+  const stem = file.replace(/\.jtd\.json$/, "");
   const schemaPath = path.join(SCHEMA_DIR, file);
   const outPath = path.join(OUT_DIR, `${stem}.mjs`);
   const code = execFileSync(JTD_CODEGEN, ["--target", "js", schemaPath], { encoding: "utf8" });
@@ -260,7 +260,7 @@ Run: `npm run codegen:validators`
 
 When adding JTD MJS validators to a project:
 
-1. Place JTD schemas in `schemas/*.jdt.json`.
+1. Place JTD schemas in `schemas/*.jtd.json`.
 2. Add `generated/` to `.gitignore` if validators are build artifacts, or commit them if you want zero-codegen deploys.
 3. Wire codegen into `Makefile` (`validators` target) or `package.json` (`codegen:validators` script).
 4. Map OpenAPI required fields to `properties` and non-required fields to `optionalProperties`; decide explicitly whether unknown object keys need `additionalProperties: true`.
@@ -268,6 +268,11 @@ When adding JTD MJS validators to a project:
 6. For multiple schemas, always generate `generated/validators.mjs` with differentiated `validate*` exports.
 7. Import parsed objects, not JSON strings.
 8. Run the local test script after codegen to confirm valid/invalid cases.
+9. If your project is Rust-based, then upgrade your validators to be WASM see the point below
+
+## Rust is what WASM does
+
+If your project is Rust, then the jdt-wasm repo generates Rust to compile to WASM. It can generate validators for Python, JavaScript, and others. Rather than deploying the mjs version, consider having Cargo generate the Rust version then compile them to WASM and have the browser load that to run as the validator in the browser.  
 
 ## Local verification (this repo)
 
@@ -290,7 +295,7 @@ Both should print `MJS validator fixture test PASSED`.
 
 ## Reference
 
-- CLI: `jtd-codegen --target js <schema.jdt.json>` writes ESM to stdout.
-- Repo examples: `examples/01_simple_user/schema.json`, `examples/02_complex_event/schema.json`.
+- CLI: `jtd-codegen --target js <schema.jtd.json>` writes ESM to stdout.
+- Repo examples: `examples/01_simple_user/schema.jtd.json`, `examples/02_complex_event/schema.jtd.json`.
 - Live demo workflow: `xmake run demo_compile` (same generator, `.js` extension in demo only).
 - Full test suite: `xmake run test_all` (includes JS validation via quickjs-rs).
