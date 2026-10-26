@@ -17,7 +17,7 @@ $(OUT_DIR)/validators.mjs: $(VALIDATORS)
 	@rm -f $@
 	@for f in $(VALIDATORS); do \
 	  stem=$$(basename "$$f" .mjs); \
-	  cap=$$(echo "$$stem" | sed -E 's/(^|-)([a-z])/\U\2/g'); \
+	  cap=$$(node -e 'const stem = process.argv[1]; process.stdout.write(stem.replace(/(^|-)([a-z])/g, (_, __, c) => c.toUpperCase()))' "$$stem"); \
 	  echo "export { validate as validate$$cap } from \"./$$stem.mjs\";" >> $@; \
 	done
 

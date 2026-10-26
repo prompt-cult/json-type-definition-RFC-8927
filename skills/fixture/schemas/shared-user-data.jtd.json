@@ -1,0 +1,17 @@
+{
+  "definitions": {
+    "User": {
+      "properties": {
+        "id": { "type": "string" }
+      }
+    }
+  },
+  "properties": {
+    "owner": { "ref": "User" },
+    "nickname": { "type": "string", "nullable": true },
+    "labels": { "values": { "type": "string" } }
+  },
+  "optionalProperties": {
+    "tags": { "elements": { "type": "string" } }
+  }
+}

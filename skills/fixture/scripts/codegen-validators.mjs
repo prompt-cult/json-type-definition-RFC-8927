@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdir, readdir, writeFile } from "node:fs/promises";
+import { mkdir, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
@@ -13,6 +13,15 @@ function exportName(stem) {
 
 const schemas = (await readdir(SCHEMA_DIR)).filter((f) => f.endsWith(".jtd.json"));
 await mkdir(OUT_DIR, { recursive: true });
+
+const expectedOutputs = new Set(
+  schemas.map((file) => `${file.replace(/\.jtd\.json$/, "")}.mjs`),
+);
+for (const file of await readdir(OUT_DIR)) {
+  if (file.endsWith(".mjs") && !expectedOutputs.has(file) && file !== "validators.mjs") {
+    await rm(path.join(OUT_DIR, file));
+  }
+}
 
 const barrelLines = [];
 for (const file of schemas.sort()) {
