@@ -6,12 +6,25 @@
 ///   jtd-codegen --target python < schema.json > validator.py
 ///   jtd-codegen --target rust   < schema.json > validator.rs
 ///   jtd-codegen --target rust   schema.json   > validator.rs
+///   jtd-codegen --target js --name validateUser schema.json > validator.mjs
 use std::io::Read;
+
+fn is_valid_identifier(name: &str) -> bool {
+    let mut chars = name.chars();
+    let Some(first) = chars.next() else {
+        return false;
+    };
+    if !(first == '_' || first.is_ascii_alphabetic()) {
+        return false;
+    }
+    chars.all(|c| c == '_' || c.is_ascii_alphanumeric())
+}
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
 
     let mut target = "rust";
+    let mut validator_name = "validate";
     let mut file_path: Option<&str> = None;
 
     let mut i = 1;
@@ -34,9 +47,20 @@ fn main() {
                     };
                 }
             }
+            "--name" | "-n" => {
+                i += 1;
+                if i >= args.len() {
+                    eprintln!("Missing value for --name");
+                    std::process::exit(1);
+                }
+                validator_name = &args[i];
+            }
             "--help" | "-h" => {
-                eprintln!("Usage: jtd-codegen [--target js|lua|python|rust] [schema.json]");
+                eprintln!(
+                    "Usage: jtd-codegen [--target js|lua|python|rust] [--name validator_name] [schema.json]"
+                );
                 eprintln!("  Reads JTD schema from file or stdin, emits code to stdout.");
+                eprintln!("  --name must be a valid identifier: [A-Za-z_][A-Za-z0-9_]*");
                 std::process::exit(0);
             }
             path => {
@@ -73,11 +97,18 @@ fn main() {
         std::process::exit(1);
     });
 
+    if !is_valid_identifier(validator_name) {
+        eprintln!(
+            "Invalid --name '{validator_name}'. Use [A-Za-z_][A-Za-z0-9_]* for compatibility across targets."
+        );
+        std::process::exit(1);
+    }
+
     let code = match target {
-        "js" => jtd_codegen::emit_js::emit(&compiled),
-        "lua" => jtd_codegen::emit_lua::emit(&compiled),
-        "python" => jtd_codegen::emit_py::emit(&compiled),
-        "rust" => jtd_codegen::emit_rs::emit(&compiled),
+        "js" => jtd_codegen::emit_js::emit_with_name(&compiled, validator_name),
+        "lua" => jtd_codegen::emit_lua::emit_with_name(&compiled, validator_name),
+        "python" => jtd_codegen::emit_py::emit_with_name(&compiled, validator_name),
+        "rust" => jtd_codegen::emit_rs::emit_with_name(&compiled, validator_name),
         _ => unreachable!(),
     };
 

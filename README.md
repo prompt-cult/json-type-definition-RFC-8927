@@ -65,6 +65,9 @@ jtd-codegen --target python schema.json > validator.py
 
 # Generate Rust
 jtd-codegen --target rust schema.json > validator.rs
+
+# Generate with a custom validator function name
+jtd-codegen --target rust --name validate_user schema.json > validator.rs
 ```
 
 ### Supported Workflows

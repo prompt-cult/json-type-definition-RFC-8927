@@ -7,6 +7,11 @@ use std::collections::BTreeMap;
 
 /// Emit a complete Python 3.13+ module from a compiled schema.
 pub fn emit(schema: &CompiledSchema) -> String {
+    emit_with_name(schema, "validate")
+}
+
+/// Emit a complete Python 3.13+ module from a compiled schema with a custom entry function name.
+pub fn emit_with_name(schema: &CompiledSchema, validate_fn_name: &str) -> String {
     let mut w = CodeWriter::new();
 
     w.line("# fmt: off");
@@ -37,7 +42,7 @@ pub fn emit(schema: &CompiledSchema) -> String {
     }
 
     // Emit the exported validate() entry point
-    w.open("def validate(instance)");
+    w.open(&format!("def {validate_fn_name}(instance)"));
     w.line("e = []");
     let root_ctx = EmitContext::root();
     emit_node(&mut w, &schema.root, &root_ctx, None);
