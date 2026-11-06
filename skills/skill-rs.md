@@ -1,6 +1,6 @@
 ---
 name: jtd-rs-validator
-description: Generate standalone Rust JTD validators with jtd-codegen from *.jdt.json schemas. Use when adding JTD validation to Rust projects, build.rs or Makefile codegen workflows, multiple schema files with differentiated validator exports, or wasm-pack validation packages.
+description: Generate standalone Rust JTD validators with jtd-codegen from *.jtd.json schemas. Use when adding JTD validation to Rust projects, build.rs or Makefile codegen workflows, multiple schema files with differentiated validator exports, or wasm-pack validation packages.
 ---
 
 # JTD → Rust validator generation
@@ -57,7 +57,7 @@ Pass a parsed `serde_json::Value`, not a JSON string. Parse strings with
 
 ## Single schema workflow
 
-Given `schemas/user.jdt.json`:
+Given `schemas/user.jtd.json`:
 
 ```json
 {
@@ -72,7 +72,7 @@ Generate a module:
 
 ```bash
 mkdir -p src/generated
-jtd-codegen --target rust schemas/user.jdt.json > src/generated/user.rs
+jtd-codegen --target rust schemas/user.jtd.json > src/generated/user.rs
 ```
 
 Include and call it from Rust:
@@ -98,9 +98,9 @@ Generate one `.rs` module per schema. Since every generated module exports
 
 | Schema | Generated module | Re-export |
 |---|---|---|
-| `user.jdt.json` | `user.rs` | `validate_user` |
-| `event.jdt.json` | `event.rs` | `validate_event` |
-| `order-item.jdt.json` | `order_item.rs` | `validate_order_item` |
+| `user.jtd.json` | `user.rs` | `validate_user` |
+| `event.jtd.json` | `event.rs` | `validate_event` |
+| `order-item.jtd.json` | `order_item.rs` | `validate_order_item` |
 
 `src/generated/mod.rs`:
 
@@ -139,7 +139,7 @@ serde_json = "1"
 
 ```rust
 fn main() {
-    let schema_path = "schemas/user.jdt.json";
+    let schema_path = "schemas/user.jtd.json";
     println!("cargo:rerun-if-changed={schema_path}");
 
     let schema_text = std::fs::read_to_string(schema_path)
@@ -179,7 +179,7 @@ regenerates `mod.rs` re-exports:
 JTD_CODEGEN ?= jtd-codegen
 SCHEMA_DIR  := schemas
 OUT_DIR     := src/generated
-SCHEMAS     := $(wildcard $(SCHEMA_DIR)/*.jdt.json)
+SCHEMAS     := $(wildcard $(SCHEMA_DIR)/*.jtd.json)
 
 .PHONY: validators clean-validators FORCE
 
@@ -189,7 +189,7 @@ $(OUT_DIR)/mod.rs: FORCE
 	@mkdir -p $(OUT_DIR)
 	@rm -f $(OUT_DIR)/*.rs
 	@for schema in $(SCHEMAS); do \
-	  stem=$$(basename "$$schema" .jdt.json); \
+	  stem=$$(basename "$$schema" .jtd.json); \
 	  snake=$$(echo "$$stem" | sed 's/-/_/g'); \
 	  $(JTD_CODEGEN) --target rust "$$schema" > "$(OUT_DIR)/$$snake.rs"; \
 	  echo "pub mod $$snake;" >> $@; \
@@ -261,7 +261,7 @@ schemaPath }` objects.
 
 ## Agent checklist
 
-1. Put schemas in `schemas/*.jdt.json`.
+1. Put schemas in `schemas/*.jtd.json`.
 2. Add `serde_json` to runtime dependencies; add `regex` and `chrono` only if
    any schema uses `timestamp`.
 3. Choose committed source (`Makefile`) or build artifacts (`build.rs` and
@@ -275,14 +275,14 @@ schemaPath }` objects.
 
 ## Local verification (this repository)
 
-Fixture schemas are in `skills/fixture/schemas/`: `user.jdt.json`,
-`event.jdt.json` (which exercises `timestamp`), and `advanced.jdt.json`.
+Fixture schemas are in `skills/fixture/schemas/`: `user.jtd.json`,
+`event.jtd.json` (which exercises `timestamp`), and `advanced.jtd.json`.
 
 ```bash
 cargo build --release -p jtd-codegen
-target/release/jtd-codegen --target rust skills/fixture/schemas/user.jdt.json \
+target/release/jtd-codegen --target rust skills/fixture/schemas/user.jtd.json \
   > /tmp/user_validator.rs
-target/release/jtd-codegen --target rust skills/fixture/schemas/event.jdt.json \
+target/release/jtd-codegen --target rust skills/fixture/schemas/event.jtd.json \
   > /tmp/event_validator.rs
 
 # Compile and run all repository validation targets.
@@ -294,7 +294,7 @@ For the full repository check, run `xmake run test_all`.
 
 ## Reference
 
-- CLI: `jtd-codegen --target rust <schema.jdt.json>` writes a Rust module to stdout.
+- CLI: `jtd-codegen --target rust <schema.jtd.json>` writes a Rust module to stdout.
 - Emitter: `jtd-codegen/src/emit_rs/emit.rs`.
 - Build-time example: `jtd-wasm-validator/build.rs`.
 - WASM wrapper: `jtd-wasm-validator/src/lib.rs`.
