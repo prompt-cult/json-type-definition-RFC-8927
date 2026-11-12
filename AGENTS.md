@@ -54,6 +54,24 @@ Install the pre-commit hook to prevent accidental regressions:
 xmake run install_hooks
 ```
 
+### Definition-to-Main Workflow (mandatory)
+
+All changes go through the issue -> branch -> PR flow. Master is protected
+with required status checks, so nothing lands without green CI.
+
+1. `gh issue create` describing the defect or work item (`gh issue -n` = its number).
+2. Branch from `origin/master` named after the issue: `issue-<numbers>`.
+3. Work the issue; commit conventional-style (`feat:`, `fix:`, `test:`, ...).
+4. Push the branch, `gh pr create --base master`, then arm auto-merge:
+   `gh pr merge --squash --auto`.
+5. Monitor to merge (blocking poll loop, not `--watch`). Required checks:
+   `Test (macos-latest)`, `Test (ubuntu-latest)`, `Test (windows-latest)`.
+6. Long-running work is tracked in the ticketing plugin (gh issue <-> ticket NNN).
+
+Note: `--auto` merges the moment required checks pass, but only if branch
+protection demands those checks AND repo settings allow auto-merge; verify
+both before trusting the gate.
+
 ### Release Process
 1. Bump version in `jtd-codegen/Cargo.toml`.
 2. Commit and tag: `git tag release/x.y.z`.
