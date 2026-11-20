@@ -16,9 +16,17 @@ permissions:
 env:
   BIN_NAME: jtd-codegen
 
+# Scoped to the triggering ref: re-pushing a tag (or a newer nightly on the
+# default branch) cancels the superseded run. Distinct tags stay in separate
+# groups and never cancel each other.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   meta:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       tag: ${{ steps.meta.outputs.tag }}
       version: ${{ steps.meta.outputs.version }}
@@ -73,6 +81,7 @@ jobs:
   build_macos:
     name: Build macOS
     runs-on: macos-latest
+    timeout-minutes: 30
     needs: meta
     if: needs.meta.outputs.should_run == 'true'
     steps:
@@ -105,6 +114,7 @@ jobs:
   build_windows:
     name: Build Windows
     runs-on: windows-latest
+    timeout-minutes: 30
     needs: meta
     if: needs.meta.outputs.should_run == 'true'
     steps:
@@ -136,6 +146,7 @@ jobs:
   build_linux_debian_trixie:
     name: Build Linux (Debian Trixie)
     runs-on: ubuntu-latest
+    timeout-minutes: 40
     needs: meta
     if: needs.meta.outputs.should_run == 'true'
     steps:
@@ -178,6 +189,7 @@ jobs:
   build_linux_arm64:
     name: Build Linux ARM64
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
     needs: meta
     if: needs.meta.outputs.should_run == 'true'
     steps:
@@ -210,6 +222,7 @@ jobs:
   release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs:
       - meta
       - build_macos
