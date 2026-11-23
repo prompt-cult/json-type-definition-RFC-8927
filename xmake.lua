@@ -168,6 +168,8 @@ target("test_all")
         os.setenv("JTD_VALIDATION_JSON", validation)
         cprint("${cyan}Running:${clear} cargo test -p jtd-codegen --test rs_validation_suite -- --nocapture")
         os.vrunv("cargo", {"test", "-p", "jtd-codegen", "--test", "rs_validation_suite", "--", "--nocapture"})
+        cprint("${cyan}Running:${clear} cargo test -p jtd-codegen --test metadata_compliance -- --nocapture")
+        os.vrunv("cargo", {"test", "-p", "jtd-codegen", "--test", "metadata_compliance", "--", "--nocapture"})
         
         if os.host() ~= "windows" then
             cprint("${cyan}Running:${clear} cargo test -p jtd-codegen --test quickjs_validation_suite -- --nocapture")
