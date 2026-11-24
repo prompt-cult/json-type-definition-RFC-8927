@@ -9,6 +9,11 @@ use crate::ast::{CompiledSchema, Node};
 
 /// Emit a complete ES2020 module from a compiled schema.
 pub fn emit(schema: &CompiledSchema) -> String {
+    emit_with_name(schema, "validate")
+}
+
+/// Emit a complete ES2020 module from a compiled schema with a custom entry function name.
+pub fn emit_with_name(schema: &CompiledSchema, validate_fn_name: &str) -> String {
     let mut w = CodeWriter::new();
 
     // Emit one function per definition
@@ -22,7 +27,7 @@ pub fn emit(schema: &CompiledSchema) -> String {
     }
 
     // Emit the exported validate() entry point
-    w.open("export function validate(instance)");
+    w.open(&format!("export function {validate_fn_name}(instance)"));
     w.line("const e = [];");
     let root_ctx = EmitContext::root();
     emit_node(&mut w, &root_ctx, &schema.root, None);
