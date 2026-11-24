@@ -1,4 +1,9 @@
-import { validateUser, validateEvent } from "./generated/validators.mjs";
+import {
+  validateUser,
+  validateEvent,
+  validateOrderItem,
+  validateSharedUserData,
+} from "./generated/validators.mjs";
 
 let pass = true;
 
@@ -44,6 +49,38 @@ assert(eventErrors.length > 0, "invalid event status should produce errors");
 assert(
   eventErrors.some((e) => e.instancePath === "/status"),
   "event status error should reference /status",
+);
+
+// Valid hyphenated-schema barrel export
+assert(
+  validateOrderItem({ sku: "SKU-1", quantity: 2 }).length === 0,
+  "valid order item should have no errors",
+);
+
+// Invalid hyphenated-schema barrel export
+const orderItemErrors = validateOrderItem({ sku: "SKU-1", quantity: -1 });
+assert(orderItemErrors.length > 0, "invalid order item quantity should produce errors");
+
+// Valid nullable value, map, and definition reference
+assert(
+  validateSharedUserData({
+    owner: { id: "usr-1" },
+    nickname: null,
+    labels: { team: "platform" },
+    tags: ["maintainer"],
+  }).length === 0,
+  "valid shared user data should have no errors",
+);
+
+// Invalid map value through the differentiated barrel export
+const sharedUserDataErrors = validateSharedUserData({
+  owner: { id: "usr-1" },
+  nickname: null,
+  labels: { team: 1 },
+});
+assert(
+  sharedUserDataErrors.some((e) => e.instancePath === "/labels/team"),
+  "invalid shared user data map value should reference /labels/team",
 );
 
 if (pass) {

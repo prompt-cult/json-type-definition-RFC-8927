@@ -48,6 +48,48 @@ Rules:
 
 Empty array means valid. Do **not** pass a JSON string — parse first with `JSON.parse`.
 
+## Common JTD schema forms
+
+Use `properties` for required object members and `optionalProperties` for members that may be absent. By default, an object using either form rejects unknown members; set `additionalProperties: true` only when extra keys are intentional.
+
+```json
+{
+  "properties": {
+    "id": { "type": "string" }
+  },
+  "optionalProperties": {
+    "nickname": { "type": "string" }
+  }
+}
+```
+
+For nullable values, set `nullable: true` on the schema form:
+
+```json
+{ "type": "string", "nullable": true }
+```
+
+Use `values` for a map whose values all follow one schema (for example, OpenAPI `additionalProperties`):
+
+```json
+{ "values": { "type": "int32" } }
+```
+
+Share schemas with `definitions` and reference them by name with `ref`:
+
+```json
+{
+  "definitions": {
+    "User": {
+      "properties": { "id": { "type": "string" } }
+    }
+  },
+  "properties": {
+    "author": { "ref": "User" }
+  }
+}
+```
+
 ## Single schema workflow
 
 ### Example schema (`schemas/user.jtd.json`)
@@ -142,7 +184,7 @@ $(OUT_DIR)/validators.mjs: $(VALIDATORS)
 	@rm -f $@
 	@for f in $(VALIDATORS); do \
 	  stem=$$(basename "$$f" .mjs); \
-	  cap=$$(echo "$$stem" | sed -E 's/(^|-)([a-z])/\U\2/g'); \
+	  cap=$$(node -e 'const stem = process.argv[1]; process.stdout.write(stem.replace(/(^|-)([a-z])/g, (_, __, c) => c.toUpperCase()))' "$$stem"); \
 	  echo "export { validate as validate$$cap } from \"./$$stem.mjs\";" >> $@; \
 	done
 
@@ -173,7 +215,7 @@ Run: `make validators` then `make test-validators`.
 
 ```javascript
 import { execFileSync } from "node:child_process";
-import { mkdir, readdir, writeFile } from "node:fs/promises";
+import { mkdir, readdir, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
@@ -187,6 +229,15 @@ function exportName(stem) {
 
 const schemas = (await readdir(SCHEMA_DIR)).filter((f) => f.endsWith(".jtd.json"));
 await mkdir(OUT_DIR, { recursive: true });
+
+const expectedOutputs = new Set(
+  schemas.map((file) => `${file.replace(/\.jtd\.json$/, "")}.mjs`),
+);
+for (const file of await readdir(OUT_DIR)) {
+  if (file.endsWith(".mjs") && !expectedOutputs.has(file) && file !== "validators.mjs") {
+    await rm(path.join(OUT_DIR, file));
+  }
+}
 
 const barrelLines = [];
 for (const file of schemas) {
@@ -212,10 +263,12 @@ When adding JTD MJS validators to a project:
 1. Place JTD schemas in `schemas/*.jtd.json`.
 2. Add `generated/` to `.gitignore` if validators are build artifacts, or commit them if you want zero-codegen deploys.
 3. Wire codegen into `Makefile` (`validators` target) or `package.json` (`codegen:validators` script).
-4. For multiple schemas, always generate `generated/validators.mjs` with differentiated `validate*` exports.
-5. Import parsed objects, not JSON strings.
-6. Run the local test script after codegen to confirm valid/invalid cases.
-7. If your project is Rust-based, then upgrade your validators to be WASM see the point below
+4. Map OpenAPI required fields to `properties` and non-required fields to `optionalProperties`; decide explicitly whether unknown object keys need `additionalProperties: true`.
+5. Use `nullable`, `values`, and `definitions`/`ref` when the source model needs nulls, maps, or shared types.
+6. For multiple schemas, always generate `generated/validators.mjs` with differentiated `validate*` exports.
+7. Import parsed objects, not JSON strings.
+8. Run the local test script after codegen to confirm valid/invalid cases.
+9. If your project is Rust-based, then upgrade your validators to be WASM see the point below
 
 ## Rust is what WASM does
 
