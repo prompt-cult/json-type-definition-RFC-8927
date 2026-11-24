@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://prompt-cult.github.io/json-type-definition-RFC-8927/sitemap.xml

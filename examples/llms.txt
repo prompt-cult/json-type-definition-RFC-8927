@@ -1,0 +1,8 @@
+# JSON Type Definition (RFC 8927) — jtd-wasm
+
+> Ahead-of-time validator code generator for JSON Type Definition schemas.
+
+Examples and generated validators:
+
+- https://prompt-cult.github.io/json-type-definition-RFC-8927/index.html
+- https://prompt-cult.github.io/json-type-definition-RFC-8927/e2e/
