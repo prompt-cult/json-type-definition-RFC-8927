@@ -26,6 +26,7 @@ pub fn emit_with_name(schema: &CompiledSchema, validate_fn_name: &str) -> String
 
     for (name, node) in &schema.definitions {
         let fn_name = def_fn_name(name);
+        w.line("#[allow(non_snake_case)]");
         w.open(&format!(
             "fn {fn_name}(v: &Value, e: &mut Vec<(String, String)>, p: &str, sp: &str)"
         ));
@@ -34,6 +35,7 @@ pub fn emit_with_name(schema: &CompiledSchema, validate_fn_name: &str) -> String
         w.line("");
     }
 
+    w.line("#[allow(non_snake_case)]");
     w.open(&format!(
         "pub fn {validate_fn_name}(instance: &Value) -> Vec<(String, String)>"
     ));
