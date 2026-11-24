@@ -21,6 +21,7 @@ pub fn emit(schema: &CompiledSchema) -> String {
 
     for (name, node) in &schema.definitions {
         let fn_name = def_fn_name(name);
+        w.line("#[allow(non_snake_case)]");
         w.open(&format!(
             "fn {fn_name}(v: &Value, e: &mut Vec<(String, String)>, p: &str, sp: &str)"
         ));
@@ -29,7 +30,14 @@ pub fn emit(schema: &CompiledSchema) -> String {
         w.line("");
     }
 
+<<<<<<< Updated upstream
     w.open("pub fn validate(instance: &Value) -> Vec<(String, String)>");
+=======
+    w.line("#[allow(non_snake_case)]");
+    w.open(&format!(
+        "pub fn {validate_fn_name}(instance: &Value) -> Vec<(String, String)>"
+    ));
+>>>>>>> Stashed changes
     w.line("let mut e: Vec<(String, String)> = Vec::new();");
     w.line("let p = \"\";");
     w.line("let sp = \"\";");
