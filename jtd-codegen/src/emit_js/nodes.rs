@@ -455,7 +455,7 @@ mod tests {
 
     #[test]
     fn test_emit_properties_required_only() {
-        let name_emitter: &dyn Fn(&mut CodeWriter, &EmitContext) = &|w, ctx| {
+        const name_emitter: fn(&mut CodeWriter, &EmitContext) = |w, ctx| {
             emit_type(w, ctx, TypeKeyword::String);
         };
         let code = emit_to_string(|w, ctx| {
@@ -474,7 +474,7 @@ mod tests {
 
     #[test]
     fn test_emit_properties_optional_only() {
-        let age_emitter: &dyn Fn(&mut CodeWriter, &EmitContext) = &|w, ctx| {
+        const age_emitter: fn(&mut CodeWriter, &EmitContext) = |w, ctx| {
             emit_type(w, ctx, TypeKeyword::Uint8);
         };
         let code = emit_to_string(|w, ctx| {
@@ -487,7 +487,7 @@ mod tests {
 
     #[test]
     fn test_emit_properties_additional_true_no_loop() {
-        let name_emitter: &dyn Fn(&mut CodeWriter, &EmitContext) = &|w, ctx| {
+        const name_emitter: fn(&mut CodeWriter, &EmitContext) = |w, ctx| {
             emit_type(w, ctx, TypeKeyword::String);
         };
         let code = emit_to_string(|w, ctx| {
@@ -499,7 +499,7 @@ mod tests {
 
     #[test]
     fn test_emit_properties_with_discrim_tag() {
-        let val_emitter: &dyn Fn(&mut CodeWriter, &EmitContext) = &|w, ctx| {
+        const val_emitter: fn(&mut CodeWriter, &EmitContext) = |w, ctx| {
             emit_type(w, ctx, TypeKeyword::Boolean);
         };
         let code = emit_to_string(|w, ctx| {
@@ -513,7 +513,7 @@ mod tests {
     #[test]
     fn test_emit_properties_empty_value() {
         // A required property with empty schema: check key exists, no value check
-        let empty_emitter: &dyn Fn(&mut CodeWriter, &EmitContext) = &|w, ctx| {
+        const empty_emitter: fn(&mut CodeWriter, &EmitContext) = |w, ctx| {
             emit_empty(w, ctx);
         };
         let code = emit_to_string(|w, ctx| {
@@ -528,12 +528,12 @@ mod tests {
 
     #[test]
     fn test_emit_discriminator_structure() {
-        let cat_emitter: &dyn Fn(&mut CodeWriter, &EmitContext) = &|w, ctx| {
+        fn cat_emitter(w: &mut CodeWriter, ctx: &EmitContext) {
             w.line(&format!("// validate cat at {}", ctx.sp));
-        };
-        let dog_emitter: &dyn Fn(&mut CodeWriter, &EmitContext) = &|w, ctx| {
+        }
+        fn dog_emitter(w: &mut CodeWriter, ctx: &EmitContext) {
             w.line(&format!("// validate dog at {}", ctx.sp));
-        };
+        }
         let code = emit_to_string(|w, ctx| {
             emit_discriminator(
                 w,
