@@ -1,6 +1,6 @@
 [package]
 name = "jtd-codegen"
-version = "0.2.0"
+version = "0.5.0"
 edition = "2021"
 description = "JTD (RFC 8927) schema compiler and code generator for JavaScript ESM and Rust"
 license = "MIT"
