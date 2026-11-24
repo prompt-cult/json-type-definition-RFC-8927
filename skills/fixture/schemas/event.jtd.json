@@ -1,0 +1,12 @@
+{
+  "properties": {
+    "id": { "type": "string" },
+    "created_at": { "type": "timestamp" },
+    "status": { "enum": ["active", "inactive", "pending"] }
+  },
+  "optionalProperties": {
+    "tags": {
+      "elements": { "type": "string" }
+    }
+  }
+}

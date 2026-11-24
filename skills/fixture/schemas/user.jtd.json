@@ -1,0 +1,10 @@
+{
+  "properties": {
+    "name": { "type": "string" },
+    "age": { "type": "int32" },
+    "email": { "type": "string" }
+  },
+  "optionalProperties": {
+    "phone": { "type": "string" }
+  }
+}

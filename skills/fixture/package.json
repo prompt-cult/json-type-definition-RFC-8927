@@ -1,0 +1,9 @@
+{
+  "name": "jtd-mjs-fixture",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "codegen:validators": "node scripts/codegen-validators.mjs",
+    "test:validators": "node test.mjs"
+  }
+}

@@ -10,7 +10,7 @@ examples/
 ├── nginx.conf.template     # Nginx config template with {{placeholders}}
 ├── nginx.conf             # Generated nginx config (gitignored)
 └── NN_example_name/       # Numbered example directories
-    ├── schema.json        # JTD schema definition
+    ├── schema.jtd.json    # JTD schema definition
     └── validator.js       # Generated validator (gitignored)
 ```
 
@@ -40,8 +40,8 @@ Generates `examples/nginx.conf` from `nginx.conf.template`:
 xmake run demo_compile
 ```
 
-For each `examples/NN_*/schema.json`:
-- Runs `jtd-codegen --target js schema.json`
+For each `examples/NN_*/schema.jtd.json`:
+- Runs `jtd-codegen --target js schema.jtd.json`
 - Writes output to `validator.js`
 
 ### 4. Start Server
@@ -63,7 +63,7 @@ Runs all four steps sequentially.
 ## Adding Examples
 
 1. Create numbered directory: `examples/03_my_example/`
-2. Add JTD schema: `examples/03_my_example/schema.json`
+2. Add JTD schema: `examples/03_my_example/schema.jtd.json`
 3. Update `index.html` examples array with test cases
 4. Run `xmake run demo_compile`
 

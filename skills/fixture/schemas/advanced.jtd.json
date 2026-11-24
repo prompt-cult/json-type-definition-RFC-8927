@@ -1,0 +1,24 @@
+{
+  "definitions": {
+    "User": {
+      "properties": {
+        "name": { "type": "string" },
+        "bio": { "type": "string", "nullable": true }
+      }
+    },
+    "Profile": {
+      "properties": {
+        "author": { "ref": "User" }
+      }
+    },
+    "ErrorMap": {
+      "values": {
+        "elements": { "type": "string" }
+      }
+    }
+  },
+  "properties": {
+    "profile": { "ref": "Profile" },
+    "errors": { "ref": "ErrorMap" }
+  }
+}

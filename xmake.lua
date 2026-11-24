@@ -168,6 +168,8 @@ target("test_all")
         os.setenv("JTD_VALIDATION_JSON", validation)
         cprint("${cyan}Running:${clear} cargo test -p jtd-codegen --test rs_validation_suite -- --nocapture")
         os.vrunv("cargo", {"test", "-p", "jtd-codegen", "--test", "rs_validation_suite", "--", "--nocapture"})
+        cprint("${cyan}Running:${clear} cargo test -p jtd-codegen --test metadata_compliance -- --nocapture")
+        os.vrunv("cargo", {"test", "-p", "jtd-codegen", "--test", "metadata_compliance", "--", "--nocapture"})
         
         if os.host() ~= "windows" then
             cprint("${cyan}Running:${clear} cargo test -p jtd-codegen --test quickjs_validation_suite -- --nocapture")
@@ -273,7 +275,7 @@ target("demo_compile")
         for _, dir in ipairs(dirs) do
             local dirname = path.basename(dir)
             if dirname:match("^%d+_") then
-                local schema = path.join(dir, "schema.json")
+                local schema = path.join(dir, "schema.jtd.json")
                 local validator_js = path.join(dir, "validator.js")
                 
                 if os.isfile(schema) then
@@ -282,7 +284,7 @@ target("demo_compile")
                     io.writefile(validator_js, output)
                     cprint("  ${green}→${clear} " .. path.relative(validator_js, projectdir))
                 else
-                    cprint("${yellow}Warning:${clear} " .. dirname .. " has no schema.json, skipping")
+                    cprint("${yellow}Warning:${clear} " .. dirname .. " has no schema.jtd.json, skipping")
                 end
             end
         end
@@ -319,7 +321,7 @@ target("demo_compile_wasm")
         for _, dir in ipairs(dirs) do
             local dirname = path.basename(dir)
             if dirname:match("^%d+_") then
-                local schema = path.join(dir, "schema.json")
+                local schema = path.join(dir, "schema.jtd.json")
                 local wasm_dir = path.join(dir, "wasm")
                 local wasm_src = path.join(wasm_dir, "src")
                 

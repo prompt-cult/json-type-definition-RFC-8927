@@ -71,7 +71,7 @@
           
           try {
             // Load schema
-            const schemaRes = await fetch(`${selectedExample}/schema.json`);
+            const schemaRes = await fetch(`${selectedExample}/schema.jtd.json`);
             if (!schemaRes.ok) throw new Error(`Failed to load schema: ${schemaRes.statusText}`);
             const schemaData = await schemaRes.json();
             setSchema(schemaData);

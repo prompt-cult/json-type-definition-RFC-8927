@@ -1,0 +1,6 @@
+{
+  "properties": {
+    "sku": { "type": "string" },
+    "quantity": { "type": "uint32" }
+  }
+}
